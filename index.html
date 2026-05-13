@@ -702,8 +702,54 @@
   .step .step-body {
     color: var(--muted-foreground);
     font-size: 16px;
-    line-height: 1.6;
+    line-height: 1.7;
     margin-bottom: 20px;
+  }
+  /* Mini schema — dot + connecting line between dots only */
+  .step-schema {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 24px;
+    padding-left: 22px;
+    max-width: 520px;
+  }
+  .schema-node {
+    position: relative;
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--foreground);
+  }
+  .schema-node::before {
+    content: '';
+    position: absolute;
+    left: -22px;
+    top: 7px;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--teal);
+    z-index: 1;
+  }
+  /* Line goes only from current dot down to the next dot, not past the last */
+  .schema-node:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: -17px;
+    top: 18px;
+    bottom: -27px;
+    width: 1px;
+    background: var(--teal-border);
+  }
+  .step h3 .kw {
+    display: inline-block;
+    background: var(--teal-dim);
+    color: var(--teal);
+    border: 1px solid var(--teal-border);
+    padding: 0 10px;
+    border-radius: 10px;
+    line-height: 1.2;
+    white-space: nowrap;
   }
   .step .detail-tag {
     display: inline-flex; gap: 10px;
@@ -895,6 +941,45 @@
     color: var(--teal);
   }
   .stat .icon-box svg { width: 22px; height: 22px; }
+  /* Mini infographic: comparison bars / filled progress */
+  .stat-viz {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 4px;
+    margin-bottom: -4px;
+    width: 100%;
+    max-width: 220px;
+  }
+  .stat-bar {
+    height: 7px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.12);
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-bar .fill {
+    position: absolute;
+    inset: 0;
+    background: var(--teal);
+    border-radius: 999px;
+    width: 0;
+    transition: width 1.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .stats.in-view .stat-bar .fill { width: var(--fill, 100%); }
+  .stats.in-view .stat:nth-child(1) .stat-bar .fill { transition-delay: 0.10s; }
+  .stats.in-view .stat:nth-child(1) .stat-bar.headline .fill { transition-delay: 0.22s; }
+  .stats.in-view .stat:nth-child(2) .stat-bar .fill { transition-delay: 0.28s; }
+  .stats.in-view .stat:nth-child(3) .stat-bar .fill { transition-delay: 0.42s; }
+  .stats.in-view .stat:nth-child(4) .stat-bar .fill { transition-delay: 0.56s; }
+  .stats.in-view .stat:nth-child(4) .stat-bar.headline .fill { transition-delay: 0.68s; }
+  .stat-bar.baseline { height: 5px; }
+  .stat-bar.baseline .fill {
+    background: #64748B;
+  }
+  .stat-bar.headline { height: 8px; }
+  /* Percent variant — single bar as tall as a stacked pair so all four stats align */
+  .stat-viz.percent .stat-bar { height: 19px; border-radius: 999px; }
   .stat .num {
     font-family: var(--font-display);
     font-size: 56px;
@@ -1192,6 +1277,7 @@
     border-bottom: 1px solid var(--border);
     padding: 32px 0;
     background: rgba(15,23,32,0.4);
+    overflow: hidden;
   }
   .trust-strip .logos-label {
     text-align: center;
@@ -1199,16 +1285,26 @@
     color: var(--muted-foreground);
     margin-bottom: 24px;
   }
-  .logos {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 32px;
-    align-items: center;
-    max-width: 1000px;
-    margin: 0 auto;
+  .logos-marquee {
+    position: relative;
+    overflow: hidden;
+    mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+  }
+  .logos-track {
+    display: flex;
+    gap: 80px;
+    width: max-content;
+    animation: logos-scroll 45s linear infinite;
+  }
+  .logos-marquee:hover .logos-track { animation-play-state: paused; }
+  @keyframes logos-scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
   }
   .logo-placeholder {
     height: 28px;
+    width: 140px;
     border-radius: 4px;
     background: rgba(255,255,255,0.04);
     display: flex; align-items: center; justify-content: center;
@@ -1217,6 +1313,7 @@
     color: var(--subtle-foreground);
     letter-spacing: 0.08em;
     opacity: 0.7;
+    flex-shrink: 0;
   }
 
   /* ── 7. BETA CTA ──────────────────────────────────────────── */
@@ -1462,11 +1559,25 @@
   </div>
 </section>
 
-<!-- Trust strip — customer logos -->
+<!-- Trust strip — customer logos (marquee) -->
 <section class="trust-strip">
   <div class="container">
     <div class="logos-label">Powering revenue teams at</div>
-    <div class="logos">
+  </div>
+  <div class="logos-marquee">
+    <div class="logos-track">
+      <!-- set A -->
+      <div class="logo-placeholder">LOGO</div>
+      <div class="logo-placeholder">LOGO</div>
+      <div class="logo-placeholder">LOGO</div>
+      <div class="logo-placeholder">LOGO</div>
+      <div class="logo-placeholder">LOGO</div>
+      <div class="logo-placeholder">LOGO</div>
+      <div class="logo-placeholder">LOGO</div>
+      <div class="logo-placeholder">LOGO</div>
+      <!-- set B (duplicate for seamless loop) -->
+      <div class="logo-placeholder">LOGO</div>
+      <div class="logo-placeholder">LOGO</div>
       <div class="logo-placeholder">LOGO</div>
       <div class="logo-placeholder">LOGO</div>
       <div class="logo-placeholder">LOGO</div>
@@ -1546,10 +1657,11 @@
       <div class="step">
         <div class="step-copy">
           <div class="step-num">01 / Discover</div>
-          <h3>AI-Powered Lead Discovery</h3>
-          <p class="step-body">
-            Describe your ICP in plain language. Salesbot searches across hundreds of millions of profiles to uncover relevant buyers, related personas, and untapped opportunities your team would otherwise miss.
-          </p>
+          <h3><span class="kw">AI-Powered</span> Lead Discovery</h3>
+          <div class="step-schema">
+            <div class="schema-node">Describe your ICP in plain language.</div>
+            <div class="schema-node">Salesbot searches across hundreds of millions of profiles to uncover relevant buyers, related personas, and untapped opportunities your team would otherwise miss.</div>
+          </div>
           <div class="detail-tag"><span>650M+ profiles</span><span>Natural language targeting</span></div>
         </div>
         <div class="step-visual visual-icp">
@@ -1590,13 +1702,11 @@
       <div class="step">
         <div class="step-copy">
           <div class="step-num">02 / Qualify</div>
-          <h3>Real-Time Buyer Qualification</h3>
-          <p class="step-body">
-            Salesbot analyzes company signals, profile data, hiring activity, and live web context to determine whether an account actually fits your market.
-          </p>
-          <p class="step-body" style="margin-top:-8px">
-            Physical security vs. IT security? The system understands the difference. Your reps only see accounts worth prioritizing.
-          </p>
+          <h3><span class="kw">Real-Time</span> Buyer Qualification</h3>
+          <div class="step-schema">
+            <div class="schema-node">Salesbot analyzes company signals, profile data, hiring activity, and live web context to determine whether an account actually fits your market.</div>
+            <div class="schema-node">Physical security vs. IT security? The system understands the difference. Your reps only see accounts worth prioritizing.</div>
+          </div>
           <div class="detail-tag"><span>Live company signals</span><span>Persona classification</span></div>
         </div>
         <div class="step-visual visual-signals">
@@ -1640,13 +1750,11 @@
       <div class="step">
         <div class="step-copy">
           <div class="step-num">03 / Connect</div>
-          <h3>High-Accuracy Contact Data</h3>
-          <p class="step-body">
-            Salesbot continuously validates mobile numbers and emails across multiple data sources, prioritizing accuracy over volume.
-          </p>
-          <p class="step-body" style="margin-top:-8px">
-            More conversations. Less wasted SDR effort.
-          </p>
+          <h3><span class="kw">High-Accuracy</span> Contact Data</h3>
+          <div class="step-schema">
+            <div class="schema-node">Salesbot continuously validates mobile numbers and emails across multiple data sources, prioritizing accuracy over volume.</div>
+            <div class="schema-node">More conversations. Less wasted SDR effort.</div>
+          </div>
           <div class="detail-tag"><span>Multi-source enrichment</span><span>Quality-first validation</span></div>
         </div>
         <div class="step-visual visual-enrich">
@@ -1690,6 +1798,10 @@
       <div class="icon-box">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M9 15l2 2 4-4"/></svg>
       </div>
+      <div class="stat-viz">
+        <div class="stat-bar baseline"><span class="fill" style="--fill: 36%"></span></div>
+        <div class="stat-bar headline"><span class="fill" style="--fill: 100%"></span></div>
+      </div>
       <div class="num">2.75×</div>
       <div class="label">More meetings booked</div>
       <div class="sub">vs. existing outbound workflow</div>
@@ -1697,6 +1809,9 @@
     <div class="stat">
       <div class="icon-box">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      </div>
+      <div class="stat-viz percent">
+        <div class="stat-bar headline"><span class="fill" style="--fill: 96%"></span></div>
       </div>
       <div class="num">96%</div>
       <div class="label">Phone coverage</div>
@@ -1706,6 +1821,9 @@
       <div class="icon-box">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
       </div>
+      <div class="stat-viz percent">
+        <div class="stat-bar headline"><span class="fill" style="--fill: 90%"></span></div>
+      </div>
       <div class="num">90%</div>
       <div class="label">Contact accuracy</div>
       <div class="sub">validated across multiple sources</div>
@@ -1713,6 +1831,10 @@
     <div class="stat">
       <div class="icon-box">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M6 12h12M10 18h4"/></svg>
+      </div>
+      <div class="stat-viz">
+        <div class="stat-bar baseline"><span class="fill" style="--fill: 25%"></span></div>
+        <div class="stat-bar headline"><span class="fill" style="--fill: 100%"></span></div>
       </div>
       <div class="num">4×</div>
       <div class="label">More qualified leads surfaced</div>
@@ -2052,6 +2174,17 @@
     });
   }, { threshold: 0.25 });
   document.querySelectorAll('.step-visual').forEach((el) => io.observe(el));
+
+  // Stats bars fill animation
+  const statsIO = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in-view');
+        statsIO.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.35 });
+  document.querySelectorAll('.stats').forEach((el) => statsIO.observe(el));
 
   // Use case tabs
   const tabs = document.querySelectorAll('#usecase-tabs .usecase-tab');
