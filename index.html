@@ -1,0 +1,2095 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Salesbot — Modern Prospecting for the AI Era</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin />
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet" />
+<style>
+  /* ── Deep Signal palette (shadcn dark + teal brand) ──────── */
+  :root {
+    --background: #0F1720;
+    --background-elev: #17212B;
+    --card: #17212B;
+    --card-elev: #1F2C3B;
+    --popover: #17212B;
+    --foreground: #E6EDF3;
+    --muted: #334155;
+    --muted-foreground: #9FB0BF;
+    --subtle-foreground: #475569;
+    --border: #2A3A48;
+    --border-strong: #334155;
+    --input: #1F2C3B;
+
+    /* Brand */
+    --teal: #2DD4BF;
+    --teal-hover: #5EEAD4;
+    --teal-dim: rgba(45,212,191,0.12);
+    --teal-glow: rgba(45,212,191,0.22);
+    --teal-border: rgba(45,212,191,0.28);
+    --blue: #38BDF8;
+    --blue-dim: rgba(56,189,248,0.12);
+    --accent-blue: #7DD3FC;
+
+    --primary: var(--teal);
+    --primary-foreground: #062B27;
+    --accent: var(--teal);
+    --ring: var(--teal);
+    --radius: 12px;
+
+    /* Light product UI palette — for embedded screenshots */
+    --ui-bg: #F1F5F9;
+    --ui-surface: #FFFFFF;
+    --ui-titlebar: #E7ECF1;
+    --ui-border: #E2E8F0;
+    --ui-border-strong: #CBD5E1;
+    --ui-text: #0F172A;
+    --ui-text-muted: #64748B;
+    --ui-text-subtle: #94A3B8;
+    --ui-row-alt: #F8FAFC;
+
+    --font-sans: 'Satoshi', system-ui, -apple-system, sans-serif;
+    --font-display: 'Satoshi', system-ui, -apple-system, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+    overflow-x: hidden;
+  }
+
+  main { padding-top: 0; }
+  /* Push hero down to clear the floating nav island */
+  .hero { padding-top: 200px; }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  /* ── Reusable atoms ───────────────────────────────────────── */
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0;
+    color: var(--teal);
+  }
+  .eyebrow .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--teal);
+  }
+
+  h1, h2 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+  h3 { font-family: var(--font-sans); font-weight: 500; letter-spacing: 0; }
+  h1 { font-size: clamp(40px, 5.5vw, 60px); line-height: 1.05; letter-spacing: -0.02em; }
+  h2 { font-size: clamp(32px, 4vw, 48px); line-height: 1.08; letter-spacing: -0.015em; }
+  h3 { font-size: 20px; line-height: 1.3; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    height: 48px; padding: 0 24px;
+    border-radius: 999px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border: 1px solid transparent;
+    text-decoration: none;
+  }
+  .btn-primary {
+    background: var(--teal);
+    color: var(--primary-foreground);
+  }
+  .btn-primary:hover {
+    background: var(--teal-hover);
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--foreground);
+    border-color: var(--border-strong);
+  }
+  .btn-ghost:hover { background: var(--card-elev); border-color: var(--teal-border); }
+  .btn-arrow { transition: transform 0.15s ease; }
+  .btn:hover .btn-arrow { transform: translateX(2px); }
+
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border) 20%, var(--border) 80%, transparent);
+  }
+
+  /* ── 1. NAV ───────────────────────────────────────────────── */
+  .nav {
+    position: fixed;
+    top: 56px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 50;
+    width: calc(100% - 80px);
+    max-width: 1100px;
+  }
+  .nav-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 60px;
+    padding: 0 8px 0 20px;
+    border-radius: 999px;
+    background: rgba(15,23,32,0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    box-shadow: 0 8px 24px -10px rgba(0,0,0,0.6);
+  }
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 700; font-size: 18px;
+    letter-spacing: -0.02em;
+    color: var(--foreground);
+    text-decoration: none;
+  }
+  .logo-mark {
+    height: 28px;
+    width: auto;
+    flex-shrink: 0;
+    display: block;
+  }
+  .nav-actions { display: flex; align-items: center; gap: 8px; }
+  .nav-link {
+    color: var(--muted-foreground);
+    text-decoration: none;
+    font-size: 15px;
+    padding: 8px 12px;
+    transition: color 0.15s;
+  }
+  .nav-link:hover { color: var(--foreground); }
+
+  /* ── 2. HERO ──────────────────────────────────────────────── */
+  .hero {
+    position: relative;
+    padding: 140px 0 80px;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 900px 500px at 50% 0%, rgba(45,212,191,0.10), transparent 60%),
+      radial-gradient(ellipse 600px 300px at 50% 100%, rgba(56,189,248,0.05), transparent);
+    pointer-events: none;
+  }
+  .hero-grid-bg {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(ellipse 700px 400px at 50% 30%, black, transparent 70%);
+    -webkit-mask-image: radial-gradient(ellipse 700px 400px at 50% 30%, black, transparent 70%);
+    opacity: 0.35;
+    pointer-events: none;
+  }
+  .hero-inner { position: relative; text-align: center; }
+  .hero h1 {
+    margin: 0 auto 28px;
+    max-width: 1000px;
+  }
+  .hero h1 .accent {
+    color: var(--teal);
+    font-weight: 500;
+  }
+  .hero .subhead {
+    max-width: 620px;
+    margin: 0 auto 40px;
+    font-size: 19px;
+    color: var(--muted-foreground);
+    line-height: 1.35;
+    font-weight: 400;
+  }
+  .hero-ctas { display: flex; gap: 12px; justify-content: center; margin-bottom: 16px; }
+  .hero-fineprint {
+    font-size: 15px;
+    color: var(--muted-foreground);
+  }
+  .hero-badges {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 28px;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+    font-size: 15px;
+    color: var(--muted-foreground);
+  }
+  .hero-badge .check {
+    width: 14px; height: 14px;
+    color: var(--teal);
+    display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    opacity: 0.85;
+  }
+  .hero-badge .check svg { width: 12px; height: 12px; }
+
+  /* Hero product mock */
+  .product-mock {
+    position: relative;
+    margin: 72px auto 0;
+    max-width: 1080px;
+    border-radius: 16px;
+    border: 1px solid var(--ui-border);
+    background: var(--ui-bg);
+    color: var(--ui-text);
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(180deg, black 65%, transparent 100%);
+    mask-image: linear-gradient(180deg, black 65%, transparent 100%);
+  }
+  .mock-titlebar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--ui-border);
+    background: var(--ui-titlebar);
+  }
+  .mock-dots { display: flex; gap: 6px; }
+  .mock-dots span {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--ui-border-strong);
+  }
+  .mock-url {
+    flex: 1; text-align: center;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    color: var(--ui-text-subtle);
+  }
+  .mock-body {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    min-height: 480px;
+  }
+  .mock-sidebar {
+    border-right: 1px solid var(--ui-border);
+    padding: 20px 14px;
+    background: var(--ui-titlebar);
+  }
+  .mock-sidebar-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--ui-text-muted);
+    margin-bottom: 2px;
+  }
+  .mock-sidebar-item.active {
+    background: var(--ui-surface);
+    color: var(--ui-text);
+    box-shadow: 0 1px 2px rgba(15,23,42,0.06);
+  }
+  .mock-sidebar-item::before {
+    content: ''; width: 14px; height: 14px;
+    border-radius: 3px;
+    background: var(--ui-border-strong);
+    flex-shrink: 0;
+  }
+  .mock-sidebar-label {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--ui-text-subtle);
+    padding: 16px 10px 8px;
+  }
+  .mock-main { padding: 24px; display: flex; flex-direction: column; gap: 18px; background: var(--ui-bg); }
+  .mock-pageheader {
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .mock-h1 {
+    font-size: 18px; font-weight: 600;
+    color: var(--ui-text);
+  }
+  .mock-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 26px; padding: 0 10px;
+    border-radius: 6px;
+    border: 1px solid var(--ui-border);
+    background: var(--ui-surface);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    color: var(--ui-text-muted);
+  }
+  .mock-pill .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 8px var(--teal-glow); }
+  .mock-input {
+    height: 38px; border-radius: 8px;
+    border: 1px solid var(--ui-border);
+    background: var(--ui-surface);
+    padding: 0 12px;
+    display: flex; align-items: center;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    color: var(--ui-text);
+  }
+  .mock-input .caret { color: var(--teal); }
+  .mock-input::before {
+    content: '>';
+    color: var(--ui-text-subtle);
+    margin-right: 8px;
+  }
+  .mock-table {
+    border: 1px solid var(--ui-border);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--ui-surface);
+  }
+  .mock-row {
+    display: grid;
+    grid-template-columns: 1.6fr 1.2fr 1fr 80px 90px;
+    padding: 10px 14px;
+    align-items: center;
+    font-size: 13px;
+    color: var(--ui-text);
+    border-bottom: 1px solid var(--ui-border);
+  }
+  .mock-row:last-child { border-bottom: none; }
+  .mock-row.header {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    color: var(--ui-text-muted);
+    letter-spacing: 0.1em;
+    background: var(--ui-row-alt);
+  }
+  .mock-avatar {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #CBD5E1, #94A3B8);
+    display: inline-block; margin-right: 8px;
+    vertical-align: middle;
+  }
+  .mock-cell-muted { color: var(--ui-text-muted); font-family: var(--font-sans); }
+  .mock-tag {
+    display: inline-flex; align-items: center;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: var(--font-sans);
+    font-size: 11px;
+    background: var(--ui-row-alt);
+    color: var(--ui-text);
+    border: 1px solid var(--ui-border);
+  }
+  .mock-tag.hot { background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; }
+  .mock-tag.warm { background: #DBEAFE; color: #1E40AF; border: 1px solid #BFDBFE; }
+  .mock-score {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    color: var(--ui-text);
+  }
+  .mock-score.high { color: #0D9488; }
+
+  /* Hero metrics row */
+  .hero-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    max-width: 900px;
+    margin: 32px auto 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-metric {
+    padding: 32px 24px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+  }
+  .hero-metric:last-child { border-right: none; }
+  .hero-metric .num {
+    font-family: var(--font-display);
+    font-size: 48px;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    margin-bottom: 12px;
+    color: var(--foreground);
+    line-height: 1;
+  }
+  .hero-metric .num em {
+    font-style: normal;
+    color: var(--teal);
+    font-weight: 500;
+  }
+  .hero-metric .label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--muted-foreground);
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .hero-metric .label svg {
+    width: 14px; height: 14px;
+    color: var(--subtle-foreground);
+    opacity: 0.7;
+    flex-shrink: 0;
+  }
+
+  /* ── 3. PROBLEM ───────────────────────────────────────────── */
+  .section { padding: 160px 0; position: relative; }
+  .section-head {
+    text-align: center;
+    margin-bottom: 80px;
+  }
+  .section-head .eyebrow { margin-bottom: 24px; }
+  .section-head h2 { max-width: 800px; margin: 0 auto 16px; }
+  .section-head .desc {
+    max-width: 600px; margin: 0 auto;
+    color: var(--muted-foreground);
+    font-size: 17px;
+  }
+
+  /* Problem → Shift schema */
+  .problem-schema {
+    max-width: 1100px;
+    margin: 0 auto 72px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 0;
+    align-items: stretch;
+  }
+  .ps-col {
+    padding: 8px 40px;
+  }
+  .ps-col:first-child { padding-left: 0; }
+  .ps-col:last-child { padding-right: 0; }
+  .ps-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    letter-spacing: 0.18em;
+    color: var(--subtle-foreground);
+    margin-bottom: 20px;
+  }
+  .ps-col.shift .ps-label { color: var(--teal); }
+  .ps-label .num {
+    font-family: var(--font-sans);
+    font-size: 15px;
+    opacity: 0.7;
+  }
+  .ps-body {
+    color: #D4D4D8;
+    font-size: 16px;
+    line-height: 1.55;
+  }
+  .ps-body p + p { margin-top: 14px; }
+  .ps-col.shift .ps-body { color: var(--foreground); }
+  .ps-divider {
+    position: relative;
+    width: 1px;
+    background: linear-gradient(180deg, transparent, var(--border) 15%, var(--border) 85%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .ps-divider .arrow {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: #0A0A0B;
+    border: 1px solid var(--teal-border);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--teal);
+    box-shadow: 0 0 24px var(--teal-glow);
+  }
+  .ps-divider .arrow svg { width: 14px; height: 14px; }
+
+  /* Problem section — strict B&W slab; only Salesbot card carries color */
+  #problem {
+    background: #0A0A0B;
+    border-top: 1px solid #1F1F22;
+    border-bottom: 1px solid #1F1F22;
+    position: relative;
+    overflow: hidden;
+  }
+  #problem > .container { position: relative; }
+  #problem .eyebrow {
+    color: #A1A1A6;
+    background: rgba(255,255,255,0.03);
+    border-color: #2A2A2E;
+  }
+  #problem .eyebrow .dot {
+    background: #A1A1A6;
+    box-shadow: none;
+  }
+  #problem h2 { color: #F4F4F5; }
+  #problem .problem-intro { color: #A1A1A6; }
+
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .compare-card {
+    border-radius: var(--radius);
+    padding: 36px 32px;
+    position: relative;
+  }
+  .compare-card.trad {
+    background: #131316;
+    border: 1px solid #1F1F22;
+    color: #E4E4E7;
+  }
+  .compare-card.bot {
+    border: 1px solid var(--teal-border);
+    background:
+      radial-gradient(ellipse 400px 220px at 50% 0%, rgba(45,212,191,0.10), transparent 70%),
+      linear-gradient(180deg, rgba(45,212,191,0.04), #131316);
+    box-shadow: 0 0 80px -20px var(--teal-glow);
+  }
+  .compare-card h3 {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 8px;
+  }
+  .compare-card.trad h3 { color: #F4F4F5; }
+  .compare-card.bot h3 { color: var(--foreground); }
+  .compare-logo {
+    height: 32px;
+    width: auto;
+    display: block;
+  }
+  .compare-card .tag {
+    font-family: var(--font-sans);
+    font-size: 15px;
+    letter-spacing: 0.1em;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+  .compare-card.trad .tag {
+    background: #1F1F22;
+    color: #A1A1A6;
+    border: 1px solid #2A2A2E;
+  }
+  .compare-card.bot .tag {
+    background: var(--teal);
+    color: var(--primary-foreground);
+    border: 1px solid var(--teal);
+    box-shadow: 0 0 16px var(--teal-glow);
+  }
+  .compare-card ul { list-style: none; margin-top: 24px; }
+  .compare-card li {
+    padding: 14px 0;
+    font-size: 15px;
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .compare-card.trad li {
+    color: #D4D4D8;
+    border-top: 1px solid #1F1F22;
+  }
+  .compare-card.bot li {
+    color: var(--foreground);
+    border-top: 1px solid rgba(45,212,191,0.12);
+  }
+  .compare-card li::before {
+    content: '';
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    flex-shrink: 0; margin-top: 2px;
+  }
+  .compare-card.trad li::before {
+    background: transparent;
+    box-shadow: inset 0 0 0 1px #52525B;
+  }
+  .compare-card.bot li::before {
+    background: var(--teal);
+    box-shadow:
+      inset 0 0 0 1px var(--teal),
+      0 0 12px var(--teal-glow);
+  }
+
+  /* ── 4. HOW IT WORKS ──────────────────────────────────────── */
+  .steps {
+    display: grid;
+    gap: 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .step {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 64px;
+    align-items: start;
+    padding: 80px 0;
+    position: relative;
+  }
+  .step:first-child { padding-top: 0; }
+  .step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 1px;
+    background: var(--border);
+  }
+  .step.reverse { grid-template-columns: 1.2fr 1fr; }
+  .step.reverse .step-copy { order: 2; }
+  .step.reverse .step-visual { order: 1; }
+
+  .step-copy { position: relative; }
+
+  /* Step number as a badge stop + label */
+  .step-num {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+    position: relative;
+  }
+  .step-badge {
+    width: 56px; height: 56px;
+    border-radius: 14px;
+    background: var(--teal-dim);
+    border: 1px solid var(--teal-border);
+    display: inline-flex;
+    align-items: center; justify-content: center;
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--teal);
+    line-height: 1;
+    box-shadow: 0 0 32px -10px var(--teal-glow);
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+  }
+  .step-label {
+    font-size: 15px;
+    color: var(--muted-foreground);
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .step-label::before {
+    content: '';
+    width: 22px; height: 1px;
+    background: var(--teal-border);
+  }
+  .step h3 {
+    font-family: var(--font-display);
+    font-size: 32px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin-bottom: 20px;
+  }
+  .step .step-body {
+    color: var(--muted-foreground);
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+  .step .detail-tag {
+    display: inline-flex; gap: 10px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    letter-spacing: 0.08em;
+    color: var(--muted-foreground);
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .step .detail-tag span {
+    padding: 4px 10px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+
+  .step-visual {
+    border: 1px solid var(--ui-border);
+    border-radius: var(--radius);
+    background: var(--ui-surface);
+    color: var(--ui-text);
+    padding: 32px;
+    min-height: 340px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 60px -20px rgba(0,0,0,0.5);
+  }
+  .step-visual .live-dot {
+    position: absolute;
+    top: 22px; right: 22px;
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--font-sans);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--ui-text-muted);
+  }
+  .step-visual .live-dot::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #0D9488;
+    animation: livePulse 1.6s ease-in-out infinite;
+  }
+  @keyframes livePulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(13,148,136,0.5); opacity: 1; }
+    50%      { box-shadow: 0 0 0 6px rgba(13,148,136,0); opacity: 0.85; }
+  }
+  /* Slide-in stagger on viewport entry */
+  .anim-row {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.55s ease-out, transform 0.55s ease-out;
+  }
+  .step-visual.in-view .anim-row { opacity: 1; transform: translateY(0); }
+  .step-visual.in-view .anim-row:nth-child(1) { transition-delay: 0.05s; }
+  .step-visual.in-view .anim-row:nth-child(2) { transition-delay: 0.20s; }
+  .step-visual.in-view .anim-row:nth-child(3) { transition-delay: 0.35s; }
+  .step-visual.in-view .anim-row:nth-child(4) { transition-delay: 0.50s; }
+  .step-visual.in-view .anim-row:nth-child(5) { transition-delay: 0.65s; }
+  /* Typing caret in step 1 prompt */
+  .typing-caret {
+    display: inline-block;
+    width: 1px; height: 1.1em;
+    background: var(--teal);
+    vertical-align: text-bottom;
+    margin-left: 2px;
+    animation: typingBlink 1s steps(2) infinite;
+  }
+  @keyframes typingBlink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+
+  /* Step 1 visual: ICP search */
+  .visual-icp .prompt {
+    padding: 12px 0;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    color: var(--ui-text);
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--ui-border);
+  }
+  .visual-icp .results { display: grid; gap: 0; }
+  .visual-icp .result-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 0;
+    font-size: 13px;
+    color: var(--ui-text);
+    border-bottom: 1px solid var(--ui-border);
+  }
+  .visual-icp .result-row:last-child { border-bottom: none; }
+  .visual-icp .result-row .pill {
+    margin-left: auto;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 500;
+    color: #0D9488;
+  }
+  .visual-icp .meta { color: var(--ui-text-muted); font-size: 12px; }
+
+  /* Step 2 visual: signals */
+  .visual-signals { display: grid; gap: 0; padding-top: 12px; }
+  .visual-signals .row {
+    display: grid;
+    grid-template-columns: 8px 1fr auto;
+    align-items: center; gap: 14px;
+    padding: 14px 0;
+    color: var(--ui-text);
+    border-bottom: 1px solid var(--ui-border);
+  }
+  .visual-signals .row:last-child { border-bottom: none; }
+  .visual-signals .icon {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--ui-border-strong);
+  }
+  .visual-signals .row .icon { background: #0D9488; }
+  .visual-signals .row:has(.skip) .icon { background: var(--ui-border-strong); }
+  .visual-signals .label { font-size: 14px; font-weight: 500; }
+  .visual-signals .sublabel { font-size: 12px; color: var(--ui-text-muted); margin-top: 2px; }
+  .visual-signals .signal-tag {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ui-text-muted);
+  }
+  .visual-signals .signal-tag.match { color: #0D9488; }
+  .visual-signals .signal-tag.skip { color: var(--ui-text-subtle); }
+
+  /* Step 3 visual: enrichment waterfall */
+  .visual-enrich .contact {
+    padding: 14px 0 18px;
+    margin-bottom: 6px;
+    display: flex; align-items: center; gap: 12px;
+    color: var(--ui-text);
+    border-bottom: 1px solid var(--ui-border);
+  }
+  .visual-enrich .contact .avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, #CBD5E1, #94A3B8);
+  }
+  .visual-enrich .contact .name { font-size: 14px; font-weight: 500; }
+  .visual-enrich .contact .title { font-size: 12px; color: var(--ui-text-muted); }
+  .visual-enrich .sources { display: grid; gap: 0; }
+  .visual-enrich .source-row {
+    display: grid;
+    grid-template-columns: 70px 1fr auto;
+    gap: 14px; align-items: center;
+    padding: 13px 0;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    border-bottom: 1px solid var(--ui-border);
+  }
+  .visual-enrich .source-row:last-child { border-bottom: none; }
+  .visual-enrich .source-row .src { color: var(--ui-text-subtle); letter-spacing: 0.06em; font-size: 10px; }
+  .visual-enrich .source-row .val { color: var(--ui-text); }
+  .visual-enrich .source-row .status { font-size: 11px; font-weight: 500; }
+  .visual-enrich .status.ok { color: #0D9488; }
+  .visual-enrich .status.fail { color: var(--ui-text-subtle); }
+
+  /* ── 5. STATS STRIP — small infographic ──────────────────── */
+  .stats {
+    background: var(--card);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 120px 0;
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+  }
+  .stat {
+    text-align: left;
+    padding: 8px 32px;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .stat:last-child { border-right: none; }
+  .stat .icon-box {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    background: var(--teal-dim);
+    border: 1px solid var(--teal-border);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--teal);
+  }
+  .stat .icon-box svg { width: 22px; height: 22px; }
+  .stat .num {
+    font-family: var(--font-display);
+    font-size: 56px;
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    color: var(--foreground);
+    line-height: 1;
+  }
+  .stat .label {
+    font-size: 17px;
+    color: var(--foreground);
+    font-weight: 500;
+    line-height: 1.3;
+  }
+  .stat .sub {
+    font-size: 15px;
+    color: var(--muted-foreground);
+    line-height: 1.4;
+    margin-top: -8px;
+  }
+  .stat .num {
+    font-family: var(--font-display);
+    font-size: 64px;
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    color: var(--foreground);
+    line-height: 1;
+  }
+  .stat .num em {
+    font-style: normal;
+    color: var(--teal);
+  }
+  .stat .label-text {
+    /* deprecated, kept to avoid breakage */
+  }
+
+  /* ── Use case (persona tabs) ─────────────────────────────── */
+  .usecase-section { padding: 120px 0; position: relative; }
+  .usecase-head { margin-bottom: 40px; max-width: 900px; }
+  .usecase-head .eyebrow { margin-bottom: 16px; }
+  .usecase-head h2 { line-height: 1.05; }
+  .usecase-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 32px;
+  }
+  .usecase-tab {
+    padding: 12px 20px;
+    border-radius: 999px;
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    color: var(--muted-foreground);
+    font-size: 15px;
+    font-weight: 500;
+    font-family: var(--font-sans);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .usecase-tab:hover { color: var(--foreground); border-color: var(--foreground); }
+  .usecase-tab.active {
+    background: var(--foreground);
+    color: var(--background);
+    border-color: var(--foreground);
+  }
+  .usecase-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    overflow: hidden;
+    min-height: 480px;
+  }
+  .usecase-content {
+    padding: 56px 64px;
+    display: flex;
+    flex-direction: column;
+  }
+  .usecase-content h3 {
+    font-family: var(--font-display);
+    font-size: 36px;
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+    max-width: 540px;
+  }
+  .usecase-content > p {
+    color: var(--muted-foreground);
+    font-size: 17px;
+    line-height: 1.5;
+    margin-bottom: 28px;
+    max-width: 540px;
+  }
+  .usecase-content .btn-ghost { align-self: flex-start; margin-bottom: 36px; }
+  .usecase-features {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-top: auto;
+  }
+  .usecase-features li {
+    display: flex; gap: 14px;
+    align-items: flex-start;
+    color: var(--foreground);
+    font-size: 16px;
+    line-height: 1.4;
+  }
+  .usecase-features .feat-icon {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--teal-dim);
+    border: 1px solid var(--teal-border);
+    color: var(--teal);
+    flex-shrink: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .usecase-features .feat-icon svg { width: 18px; height: 18px; }
+  .usecase-visual {
+    border-left: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+    background: var(--card-elev);
+  }
+  .usecase-visual img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .usecase-visual::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(15,23,32,0) 60%, rgba(15,23,32,0.4));
+    pointer-events: none;
+  }
+  .usecase-pane { display: none; }
+  .usecase-pane.active {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    min-height: 480px;
+  }
+
+  /* ── 6. CUSTOMER PROOF ────────────────────────────────────── */
+  .proof-section {
+    padding: 80px 0;
+    position: relative;
+  }
+  /* Carousel */
+  .proof-carousel { position: relative; }
+  .proof-track {
+    display: flex;
+    gap: 24px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    padding: 4px;
+    margin: -4px;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .proof-track::-webkit-scrollbar { display: none; }
+  .proof-card {
+    flex: 0 0 100%;
+    scroll-snap-align: center;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: var(--card);
+    padding: 80px 80px 72px;
+    position: relative;
+    overflow: hidden;
+  }
+  .proof-card.placeholder { opacity: 0.55; }
+  .proof-card.placeholder .label { color: var(--subtle-foreground); }
+  .proof-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 32px;
+  }
+  .proof-dots {
+    display: flex; gap: 8px;
+  }
+  .proof-dots button {
+    width: 24px; height: 4px;
+    border-radius: 999px;
+    background: var(--border-strong);
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+    padding: 0;
+  }
+  .proof-dots button.active { background: var(--teal); }
+  .proof-arrows {
+    display: flex; gap: 8px;
+  }
+  .proof-arrow {
+    width: 44px; height: 44px;
+    border-radius: 999px;
+    border: 1px solid var(--border-strong);
+    background: transparent;
+    color: var(--foreground);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .proof-arrow:hover { border-color: var(--teal-border); color: var(--teal); }
+  .proof-arrow:disabled { opacity: 0.3; cursor: not-allowed; }
+  .proof-arrow svg { width: 18px; height: 18px; }
+  .proof-card::before { display: none; }
+  .proof-card .label {
+    font-family: var(--font-sans);
+    font-size: 15px;
+    letter-spacing: 0.18em;
+    color: var(--muted-foreground);
+    margin-bottom: 12px;
+  }
+  .proof-card h3 {
+    font-family: var(--font-display);
+    font-size: 44px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 32px;
+    max-width: 900px;
+  }
+  .proof-card .quote {
+    font-size: 20px;
+    line-height: 1.55;
+    color: var(--foreground);
+    border-left: 2px solid var(--teal);
+    padding-left: 24px;
+    max-width: 880px;
+    margin-bottom: 16px;
+  }
+  .proof-card .quote + p {
+    color: var(--muted-foreground);
+    font-size: 16px;
+    max-width: 880px;
+    padding-left: 26px;
+  }
+  .quote-author {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 28px;
+    padding-left: 26px;
+  }
+  .quote-avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #334155, #1F2C3B);
+    border: 1px solid var(--border-strong);
+    flex-shrink: 0;
+  }
+  .quote-name {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--foreground);
+    line-height: 1.3;
+  }
+  .quote-title {
+    font-size: 15px;
+    color: var(--muted-foreground);
+    line-height: 1.3;
+  }
+  .proof-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    margin-top: 56px;
+    padding-top: 40px;
+    border-top: 1px solid var(--border);
+  }
+  .proof-stat .num {
+    font-family: var(--font-display);
+    font-size: 44px;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    margin-bottom: 4px;
+    color: var(--teal);
+  }
+  .proof-stat .label-sm {
+    font-size: 15px;
+    color: var(--muted-foreground);
+    text-transform: none;
+    letter-spacing: 0;
+    font-family: var(--font-sans);
+  }
+
+  /* Trust strip — top-of-page customer logos */
+  .trust-strip {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 32px 0;
+    background: rgba(15,23,32,0.4);
+  }
+  .trust-strip .logos-label {
+    text-align: center;
+    font-size: 15px;
+    color: var(--muted-foreground);
+    margin-bottom: 24px;
+  }
+  .logos {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 32px;
+    align-items: center;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  .logo-placeholder {
+    height: 28px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.04);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    color: var(--subtle-foreground);
+    letter-spacing: 0.08em;
+    opacity: 0.7;
+  }
+
+  /* ── 7. BETA CTA ──────────────────────────────────────────── */
+  /* Full-bleed final CTA — open content, no card */
+  .cta-section {
+    padding: 200px 0;
+    text-align: center;
+    position: relative;
+    border-top: 1px solid var(--border);
+  }
+  .cta-section .eyebrow { margin-bottom: 28px; }
+  .cta-section h2 { margin: 0 auto 28px; max-width: 800px; }
+  .cta-section .body {
+    color: var(--muted-foreground);
+    font-size: 18px;
+    line-height: 1.45;
+    max-width: 580px;
+    margin: 0 auto 8px;
+  }
+  .cta-section .body + .body { margin-top: 12px; margin-bottom: 40px; }
+  .cta-section .btn-primary { height: 52px; padding: 0 28px; font-size: 15px; }
+  .cta-section .fineprint {
+    margin-top: 24px;
+    font-size: 15px;
+    color: var(--muted-foreground);
+  }
+
+  /* ── 8. FOOTER ────────────────────────────────────────────── */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding: 64px 0 40px;
+  }
+  .footer-inner {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr 1fr 1fr;
+    gap: 56px;
+  }
+  .footer-brand .logo { margin-bottom: 16px; }
+  .footer-brand .tagline {
+    color: var(--muted-foreground);
+    font-size: 15px;
+    max-width: 280px;
+  }
+  .footer-col h4 {
+    font-family: var(--font-sans);
+    font-size: 15px;
+    letter-spacing: 0.18em;
+    color: var(--subtle-foreground);
+    margin-bottom: 16px;
+    font-weight: 500;
+  }
+  .footer-col ul { list-style: none; display: grid; gap: 10px; }
+  .footer-col a {
+    color: var(--muted-foreground);
+    text-decoration: none;
+    font-size: 15px;
+    transition: color 0.15s;
+  }
+  .footer-col a:hover { color: var(--foreground); }
+  .footer-bottom {
+    margin-top: 56px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between;
+    color: var(--subtle-foreground);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    letter-spacing: 0.08em;
+  }
+
+  /* ── Responsive ───────────────────────────────────────────── */
+  @media (max-width: 900px) {
+    .container { padding: 0 20px; }
+    .hero { padding: 64px 0 40px; }
+    .section { padding: 80px 0; }
+    .mock-body { grid-template-columns: 1fr; }
+    .mock-sidebar { display: none; }
+    .compare, .steps { gap: 16px; }
+    .compare { grid-template-columns: 1fr; }
+    .step, .step.reverse { grid-template-columns: 1fr; gap: 24px; }
+    .step.reverse .step-copy { order: 1; }
+    .step.reverse .step-visual { order: 2; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .stat { border-bottom: 1px solid var(--border); padding: 20px; }
+    .stat:nth-child(2) { border-right: none; }
+    .footer-inner { grid-template-columns: 1fr 1fr; gap: 32px; }
+    .proof-card { padding: 32px 24px; }
+    .cta-card { padding: 48px 24px; }
+    .logos { grid-template-columns: repeat(3, 1fr); }
+    .mock-row { grid-template-columns: 1.6fr 1fr 80px; }
+    .mock-row > :nth-child(3), .mock-row > :nth-child(4) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<main>
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION 1 — NAVIGATION
+═══════════════════════════════════════════════════ -->
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="#" class="logo">
+      <img class="logo-mark" src="./images/logo-png.png" alt="Salesbot" />
+    </a>
+    <div class="nav-actions">
+      <a href="#" class="nav-link">Login</a>
+      <a href="#beta" class="btn btn-primary">
+        Request Beta Access
+        <svg class="btn-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION 2 — HERO
+═══════════════════════════════════════════════════ -->
+<section class="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="container hero-inner">
+    <h1>Better Targeting <br /><span class="accent">Creates Better Pipeline.</span></h1>
+    <p class="subhead">
+      Salesbot helps revenue teams uncover qualified buyers earlier, improve connect rates, and generate more pipeline — without changing their existing outbound workflow.
+    </p>
+    <div class="hero-ctas">
+      <a href="#beta" class="btn btn-primary">
+        Join the Beta
+        <svg class="btn-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+    <div class="hero-badges">
+      <span class="hero-badge">
+        <span class="check"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M2.5 6.5l2.5 2.5 4.5-5"/></svg></span>
+        No setup required
+      </span>
+      <span class="hero-badge">
+        <span class="check"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M2.5 6.5l2.5 2.5 4.5-5"/></svg></span>
+        Works with your existing stack
+      </span>
+      <span class="hero-badge">
+        <span class="check"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M2.5 6.5l2.5 2.5 4.5-5"/></svg></span>
+        Response within 24 hours
+      </span>
+    </div>
+
+    <!-- Product mock — the hero of the section -->
+    <div class="product-mock">
+      <div class="mock-titlebar">
+        <div class="mock-dots"><span></span><span></span><span></span></div>
+        <div class="mock-url">app.salesbot.ai / accounts / fit-scored</div>
+        <div style="width:50px"></div>
+      </div>
+      <div class="mock-body">
+        <aside class="mock-sidebar">
+          <div class="mock-sidebar-label">Workspace</div>
+          <div class="mock-sidebar-item active">Accounts</div>
+          <div class="mock-sidebar-item">Contacts</div>
+          <div class="mock-sidebar-item">Lists</div>
+          <div class="mock-sidebar-label">Pipeline</div>
+          <div class="mock-sidebar-item">Discover</div>
+          <div class="mock-sidebar-item">Qualify</div>
+          <div class="mock-sidebar-item">Enrichment</div>
+          <div class="mock-sidebar-label">Settings</div>
+          <div class="mock-sidebar-item">ICP profiles</div>
+          <div class="mock-sidebar-item">Integrations</div>
+        </aside>
+        <div class="mock-main">
+          <div class="mock-pageheader">
+            <div class="mock-h1">Fit-scored accounts · 1,284</div>
+            <div class="mock-pill"><span class="dot"></span> Live · syncing</div>
+          </div>
+          <div class="mock-input">VP of Physical Security at mid-market manufacturers, 500–5k employees<span class="caret">|</span></div>
+          <div class="mock-table">
+            <div class="mock-row header">
+              <div>Contact</div><div>Company</div><div>Signal</div><div>Score</div><div>Stage</div>
+            </div>
+            <div class="mock-row">
+              <div><span class="mock-avatar"></span>Marcus Webb</div>
+              <div class="mock-cell-muted">Northgate Mfg.</div>
+              <div><span class="mock-tag hot">Hiring · Sec Ops</span></div>
+              <div class="mock-score high">96</div>
+              <div><span class="mock-tag">Qualified</span></div>
+            </div>
+            <div class="mock-row">
+              <div><span class="mock-avatar"></span>Priya Shah</div>
+              <div class="mock-cell-muted">Volta Robotics</div>
+              <div><span class="mock-tag warm">Expansion</span></div>
+              <div class="mock-score high">92</div>
+              <div><span class="mock-tag">Qualified</span></div>
+            </div>
+            <div class="mock-row">
+              <div><span class="mock-avatar"></span>D. Okafor</div>
+              <div class="mock-cell-muted">Helix Industrial</div>
+              <div><span class="mock-tag hot">Funding · Series C</span></div>
+              <div class="mock-score">87</div>
+              <div><span class="mock-tag">Review</span></div>
+            </div>
+            <div class="mock-row">
+              <div><span class="mock-avatar"></span>R. Lindqvist</div>
+              <div class="mock-cell-muted">Coastline Foods</div>
+              <div><span class="mock-tag warm">New Plant</span></div>
+              <div class="mock-score">81</div>
+              <div><span class="mock-tag">Review</span></div>
+            </div>
+            <div class="mock-row">
+              <div><span class="mock-avatar"></span>K. Tanaka</div>
+              <div class="mock-cell-muted">Beacon Logistics</div>
+              <div><span class="mock-tag">Persona match</span></div>
+              <div class="mock-score">76</div>
+              <div><span class="mock-tag">Review</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hero metrics -->
+    <div class="hero-metrics">
+      <div class="hero-metric">
+        <div class="num">2.75×</div>
+        <div class="label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M9 15l2 2 4-4"/></svg>
+          More meetings booked
+        </div>
+      </div>
+      <div class="hero-metric">
+        <div class="num">96%</div>
+        <div class="label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          Phone coverage
+        </div>
+      </div>
+      <div class="hero-metric">
+        <div class="num">90%</div>
+        <div class="label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
+          Contact accuracy
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Trust strip — customer logos -->
+<section class="trust-strip">
+  <div class="container">
+    <div class="logos-label">Powering revenue teams at</div>
+    <div class="logos">
+      <div class="logo-placeholder">LOGO</div>
+      <div class="logo-placeholder">LOGO</div>
+      <div class="logo-placeholder">LOGO</div>
+      <div class="logo-placeholder">LOGO</div>
+      <div class="logo-placeholder">LOGO</div>
+      <div class="logo-placeholder">LOGO</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION 3 — PROBLEM
+═══════════════════════════════════════════════════ -->
+<section class="section" id="problem">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">The Problem</div>
+      <h2>Your List Is Everyone Else's List Too.</h2>
+    </div>
+
+    <div class="problem-schema">
+      <div class="ps-col">
+        <div class="ps-label"><span class="num">01</span> The state today</div>
+        <div class="ps-body">
+          <p>Most outbound teams are working from the same recycled databases. Your reps spend hours calling people who have already ignored dozens of competitors.</p>
+          <p>AI made outbound faster. It did not make it more relevant.</p>
+        </div>
+      </div>
+      <div class="ps-divider">
+        <div class="arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </div>
+      </div>
+      <div class="ps-col shift">
+        <div class="ps-label"><span class="num">02</span> The shift</div>
+        <div class="ps-body">
+          <p>The teams winning today are identifying better-fit buyers earlier, qualifying them faster, and reaching prospects their competitors have not saturated yet.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="compare">
+      <div class="compare-card trad">
+        <h3>Traditional Prospecting <span class="tag">Today</span></h3>
+        <ul>
+          <li>Saturated contacts already targeted by competing sales teams</li>
+          <li>Rigid filters that miss valuable buyers outside exact title matches</li>
+          <li>Outdated contact data that leads to missed conversations</li>
+          <li>SDR time wasted on accounts that were never a fit to begin with</li>
+        </ul>
+      </div>
+      <div class="compare-card bot">
+        <h3><img src="./images/logo-png.png" alt="Salesbot" class="compare-logo" /> <span class="tag">Modern</span></h3>
+        <ul>
+          <li>Finds buyers your competitors are not already targeting</li>
+          <li>Understands buyer intent and related personas beyond static filters</li>
+          <li>Continuously validates contact data across multiple providers</li>
+          <li>Qualifies leads before reps ever pick up the phone</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION 4 — HOW IT WORKS
+═══════════════════════════════════════════════════ -->
+<section class="section" id="how">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">How It Works</div>
+      <h2>Better Pipeline Starts<br />with Better Targeting.</h2>
+    </div>
+
+    <div class="steps">
+      <!-- Step 1 -->
+      <div class="step">
+        <div class="step-copy">
+          <div class="step-num">01 / Discover</div>
+          <h3>AI-Powered Lead Discovery</h3>
+          <p class="step-body">
+            Describe your ICP in plain language. Salesbot searches across hundreds of millions of profiles to uncover relevant buyers, related personas, and untapped opportunities your team would otherwise miss.
+          </p>
+          <div class="detail-tag"><span>650M+ profiles</span><span>Natural language targeting</span></div>
+        </div>
+        <div class="step-visual visual-icp">
+          <div class="live-dot">Live</div>
+          <div class="prompt anim-row">
+            VPs of Physical Security · Mid-market manufacturers · Active hiring signals<span class="typing-caret"></span>
+          </div>
+          <div class="results">
+            <div class="result-row anim-row">
+              <span class="mock-avatar"></span>
+              <div>
+                <div>Marcus Webb</div>
+                <div class="meta">Northgate Manufacturing</div>
+              </div>
+              <span class="pill">96</span>
+            </div>
+            <div class="result-row anim-row">
+              <span class="mock-avatar"></span>
+              <div>
+                <div>Priya Shah</div>
+                <div class="meta">Volta Robotics</div>
+              </div>
+              <span class="pill">92</span>
+            </div>
+            <div class="result-row anim-row">
+              <span class="mock-avatar"></span>
+              <div>
+                <div>D. Okafor</div>
+                <div class="meta">Helix Industrial</div>
+              </div>
+              <span class="pill">87</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step">
+        <div class="step-copy">
+          <div class="step-num">02 / Qualify</div>
+          <h3>Real-Time Buyer Qualification</h3>
+          <p class="step-body">
+            Salesbot analyzes company signals, profile data, hiring activity, and live web context to determine whether an account actually fits your market.
+          </p>
+          <p class="step-body" style="margin-top:-8px">
+            Physical security vs. IT security? The system understands the difference. Your reps only see accounts worth prioritizing.
+          </p>
+          <div class="detail-tag"><span>Live company signals</span><span>Persona classification</span></div>
+        </div>
+        <div class="step-visual visual-signals">
+          <div class="live-dot">Analyzing</div>
+          <div class="row anim-row">
+            <div class="icon"></div>
+            <div>
+              <div class="label">Northgate Manufacturing</div>
+              <div class="sublabel">Hiring Security Ops Manager</div>
+            </div>
+            <span class="signal-tag match">Match</span>
+          </div>
+          <div class="row anim-row">
+            <div class="icon"></div>
+            <div>
+              <div class="label">Coastline Foods</div>
+              <div class="sublabel">New facility · Phoenix AZ</div>
+            </div>
+            <span class="signal-tag match">Match</span>
+          </div>
+          <div class="row anim-row">
+            <div class="icon"></div>
+            <div>
+              <div class="label">Tessera Software</div>
+              <div class="sublabel">IT security vendor</div>
+            </div>
+            <span class="signal-tag skip">Skip</span>
+          </div>
+          <div class="row anim-row">
+            <div class="icon"></div>
+            <div>
+              <div class="label">Helix Industrial</div>
+              <div class="sublabel">Series C · $84M</div>
+            </div>
+            <span class="signal-tag match">Match</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step">
+        <div class="step-copy">
+          <div class="step-num">03 / Connect</div>
+          <h3>High-Accuracy Contact Data</h3>
+          <p class="step-body">
+            Salesbot continuously validates mobile numbers and emails across multiple data sources, prioritizing accuracy over volume.
+          </p>
+          <p class="step-body" style="margin-top:-8px">
+            More conversations. Less wasted SDR effort.
+          </p>
+          <div class="detail-tag"><span>Multi-source enrichment</span><span>Quality-first validation</span></div>
+        </div>
+        <div class="step-visual visual-enrich">
+          <div class="live-dot">Verifying</div>
+          <div class="contact anim-row">
+            <div class="avatar"></div>
+            <div>
+              <div class="name">Marcus Webb</div>
+              <div class="title">VP Physical Security</div>
+            </div>
+          </div>
+          <div class="sources">
+            <div class="source-row anim-row">
+              <span class="src">Source 1</span>
+              <span class="val">+1 (415) 555 · 0118</span>
+              <span class="status ok">Verified</span>
+            </div>
+            <div class="source-row anim-row">
+              <span class="src">Source 2</span>
+              <span class="val">+1 (415) 555 · 0118</span>
+              <span class="status ok">Match</span>
+            </div>
+            <div class="source-row anim-row">
+              <span class="src">Source 3</span>
+              <span class="val">m.webb@northgate-mfg.com</span>
+              <span class="status ok">Verified</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION 5 — STATS STRIP
+═══════════════════════════════════════════════════ -->
+<section class="stats">
+  <div class="container stats-grid">
+    <div class="stat">
+      <div class="icon-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M9 15l2 2 4-4"/></svg>
+      </div>
+      <div class="num">2.75×</div>
+      <div class="label">More meetings booked</div>
+      <div class="sub">vs. existing outbound workflow</div>
+    </div>
+    <div class="stat">
+      <div class="icon-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      </div>
+      <div class="num">96%</div>
+      <div class="label">Phone coverage</div>
+      <div class="sub">across enterprise contacts</div>
+    </div>
+    <div class="stat">
+      <div class="icon-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
+      </div>
+      <div class="num">90%</div>
+      <div class="label">Contact accuracy</div>
+      <div class="sub">validated across multiple sources</div>
+    </div>
+    <div class="stat">
+      <div class="icon-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M6 12h12M10 18h4"/></svg>
+      </div>
+      <div class="num">4×</div>
+      <div class="label">More qualified leads surfaced</div>
+      <div class="sub">your competitors aren't touching</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     USE CASE — persona tabs
+═══════════════════════════════════════════════════ -->
+<section class="usecase-section" id="use-case">
+  <div class="container">
+    <div class="usecase-head">
+      <div class="eyebrow"><span class="dot"></span> Use case</div>
+      <h2>Why revenue teams use Salesbot to drive pipeline.</h2>
+    </div>
+
+    <div class="usecase-tabs" id="usecase-tabs">
+      <button class="usecase-tab active" data-pane="0">Sales Leader</button>
+      <button class="usecase-tab" data-pane="1">RevOps</button>
+      <button class="usecase-tab" data-pane="2">CRO</button>
+      <button class="usecase-tab" data-pane="3">Marketing</button>
+      <button class="usecase-tab" data-pane="4">Demand Gen</button>
+    </div>
+
+    <div class="usecase-card" id="usecase-card">
+      <!-- Pane 0: Sales Leader -->
+      <div class="usecase-pane active">
+        <div class="usecase-content">
+          <h3>Hit your number with less noise.</h3>
+          <p>Your reps spend more time talking to qualified buyers and less time chasing dead lists.</p>
+          <a href="#" class="btn btn-ghost">Learn more <svg class="btn-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
+          <ul class="usecase-features">
+            <li>
+              <span class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
+              Surface only accounts that match your ICP and show real intent.
+            </li>
+            <li>
+              <span class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
+              Higher connect rates from validated mobile and email data.
+            </li>
+            <li>
+              <span class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg></span>
+              Less SDR effort wasted on stale, recycled databases.
+            </li>
+          </ul>
+        </div>
+        <div class="usecase-visual"><img src="./images/71d7da20-e715-4802-81b1-7de7862b76cf.jpeg" alt="" /></div>
+      </div>
+
+      <!-- Pane 1: RevOps -->
+      <div class="usecase-pane">
+        <div class="usecase-content">
+          <h3>Cleaner data, fewer tools.</h3>
+          <p>Replace multi-vendor stacks with one source of truth for accounts, contacts, and signals.</p>
+          <a href="#" class="btn btn-ghost">Learn more <svg class="btn-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
+          <ul class="usecase-features">
+            <li>
+              <span class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5M3 12a9 3 0 0 0 18 0"/></svg></span>
+              Contact data continuously validated across multiple providers.
+            </li>
+            <li>
+              <span class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 9h6v6H9z"/></svg></span>
+              One pipeline, one set of truth — no more data drift between tools.
+            </li>
+            <li>
+              <span class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg></span>
+              Less data hygiene cleanup, more time on systems strategy.
+            </li>
+          </ul>
+        </div>
+        <div class="usecase-visual"><img src="./images/71d7da20-e715-4802-81b1-7de7862b76cf.jpeg" alt="" /></div>
+      </div>
+
+      <!-- Pane 2: CRO -->
+      <div class="usecase-pane">
+        <div class="usecase-content">
+          <h3>Predictable pipeline, faster.</h3>
+          <p>Build pipeline you can actually forecast — based on fit, not on volume.</p>
+          <a href="#" class="btn btn-ghost">Learn more <svg class="btn-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
+          <ul class="usecase-features">
+            <li>
+              <span class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 3 5-7"/></svg></span>
+              Pipeline tied to ICP-fit accounts, not lead volume.
+            </li>
+            <li>
+              <span class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+              Coverage across enterprise buyers your team is missing today.
+            </li>
+            <li>
+              <span class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg></span>
+              Forecast confidence improves quarter over quarter.
+            </li>
+          </ul>
+        </div>
+        <div class="usecase-visual"><img src="./images/71d7da20-e715-4802-81b1-7de7862b76cf.jpeg" alt="" /></div>
+      </div>
+
+      <!-- Pane 3: Marketing -->
+      <div class="usecase-pane">
+        <div class="usecase-content">
+          <h3>Reach the buyers your campaigns miss.</h3>
+          <p>Engage related personas and accounts your competitors haven't saturated yet.</p>
+          <a href="#" class="btn btn-ghost">Learn more <svg class="btn-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
+          <ul class="usecase-features">
+            <li>
+              <span class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M2 12h20M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></span>
+              Untapped audience segments discovered automatically.
+            </li>
+            <li>
+              <span class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 11l2 2 4-4"/></svg></span>
+              Persona expansion beyond rigid title filters.
+            </li>
+            <li>
+              <span class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18l6-6 4 4 8-8"/><path d="M21 8v6h-6"/></svg></span>
+              Demand programs that don't fight for the same ear.
+            </li>
+          </ul>
+        </div>
+        <div class="usecase-visual"><img src="./images/71d7da20-e715-4802-81b1-7de7862b76cf.jpeg" alt="" /></div>
+      </div>
+
+      <!-- Pane 4: Demand Gen -->
+      <div class="usecase-pane">
+        <div class="usecase-content">
+          <h3>Get to revenue, faster.</h3>
+          <p>Build outbound that works before you hire your first SDR.</p>
+          <a href="#" class="btn btn-ghost">Learn more <svg class="btn-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
+          <ul class="usecase-features">
+            <li>
+              <span class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg></span>
+              Targeting in plain language, no ops skills required.
+            </li>
+            <li>
+              <span class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg></span>
+              Quality contact data out of the box.
+            </li>
+            <li>
+              <span class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg></span>
+              Pipeline starting in days, not months.
+            </li>
+          </ul>
+        </div>
+        <div class="usecase-visual"><img src="./images/71d7da20-e715-4802-81b1-7de7862b76cf.jpeg" alt="" /></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION 6 — CUSTOMER PROOF (carousel)
+═══════════════════════════════════════════════════ -->
+<section class="proof-section" id="proof">
+  <div class="container">
+    <div class="proof-carousel">
+      <div class="proof-track" id="proof-track">
+        <div class="proof-card">
+          <div class="label">Case study · Branch49</div>
+          <h3>Why Branch49 Replaced ZoomInfo After 8&nbsp;Years</h3>
+          <blockquote class="quote">
+            "Branch49 ran Salesbot alongside ZoomInfo and replaced it within months after seeing stronger connect rates, better lead quality, and more meetings booked."
+          </blockquote>
+          <p>Their team engages millions of enterprise buyers across organizations like Splunk, Comcast, and Rockwell Automation.</p>
+          <div class="quote-author">
+            <div class="quote-avatar"></div>
+            <div>
+              <div class="quote-name">[ Name placeholder ]</div>
+              <div class="quote-title">[ Title ] · Branch49</div>
+            </div>
+          </div>
+          <div class="proof-stats">
+            <div class="proof-stat">
+              <div class="num">1.5×</div>
+              <div class="label-sm">Better connect rates</div>
+            </div>
+            <div class="proof-stat">
+              <div class="num">2.8×</div>
+              <div class="label-sm">More meetings booked</div>
+            </div>
+            <div class="proof-stat">
+              <div class="num">Millions</div>
+              <div class="label-sm">Enterprise buyers engaged</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="proof-card placeholder">
+          <div class="label">Case study · [ company ]</div>
+          <h3>[ Customer headline goes here ]</h3>
+          <blockquote class="quote">
+            "[ Pull quote from the customer about why they switched and what improved. Around 1–2 sentences. ]"
+          </blockquote>
+          <p>[ Context paragraph — who the customer is, what market they engage, scale. ]</p>
+          <div class="quote-author">
+            <div class="quote-avatar"></div>
+            <div>
+              <div class="quote-name">[ Name ]</div>
+              <div class="quote-title">[ Title ] · [ Company ]</div>
+            </div>
+          </div>
+          <div class="proof-stats">
+            <div class="proof-stat">
+              <div class="num">—</div>
+              <div class="label-sm">Stat one</div>
+            </div>
+            <div class="proof-stat">
+              <div class="num">—</div>
+              <div class="label-sm">Stat two</div>
+            </div>
+            <div class="proof-stat">
+              <div class="num">—</div>
+              <div class="label-sm">Stat three</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="proof-card placeholder">
+          <div class="label">Case study · [ company ]</div>
+          <h3>[ Customer headline goes here ]</h3>
+          <blockquote class="quote">
+            "[ Pull quote from the customer about why they switched and what improved. ]"
+          </blockquote>
+          <p>[ Context paragraph — who the customer is, what market they engage, scale. ]</p>
+          <div class="quote-author">
+            <div class="quote-avatar"></div>
+            <div>
+              <div class="quote-name">[ Name ]</div>
+              <div class="quote-title">[ Title ] · [ Company ]</div>
+            </div>
+          </div>
+          <div class="proof-stats">
+            <div class="proof-stat">
+              <div class="num">—</div>
+              <div class="label-sm">Stat one</div>
+            </div>
+            <div class="proof-stat">
+              <div class="num">—</div>
+              <div class="label-sm">Stat two</div>
+            </div>
+            <div class="proof-stat">
+              <div class="num">—</div>
+              <div class="label-sm">Stat three</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="proof-nav">
+        <div class="proof-dots" id="proof-dots">
+          <button class="active" aria-label="Slide 1"></button>
+          <button aria-label="Slide 2"></button>
+          <button aria-label="Slide 3"></button>
+        </div>
+        <div class="proof-arrows">
+          <button class="proof-arrow" id="proof-prev" aria-label="Previous">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          </button>
+          <button class="proof-arrow" id="proof-next" aria-label="Next">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION 7 — BETA CTA
+═══════════════════════════════════════════════════ -->
+<section class="cta-section" id="beta">
+  <div class="container">
+    <div class="eyebrow"><span class="dot"></span> Limited Beta Access</div>
+    <h2>See What Your Current<br />Data Is Missing.</h2>
+    <p class="body">We're opening early access to revenue teams looking to improve targeting, increase connect rates, and reduce wasted outbound effort.</p>
+    <p class="body">Bring your ICP. We'll show you the buyers your team is missing.</p>
+    <a href="#" class="btn btn-primary">
+      Request Access
+      <svg class="btn-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </a>
+    <div class="fineprint">No credit card required · Response within 24 hours</div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION 8 — FOOTER
+═══════════════════════════════════════════════════ -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="#" class="logo">
+          <img class="logo-mark" src="./images/logo-png.png" alt="Salesbot" />
+        </a>
+        <p class="tagline">Modern prospecting built for the AI era.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="#">Integrations</a></li>
+          <li><a href="#">Competitors</a></li>
+          <li><a href="#">Security &amp; Privacy</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#">Podcast</a></li>
+          <li><a href="#">Contact us</a></li>
+          <li><a href="#">Legacy site</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Account</h4>
+        <ul>
+          <li><a href="#">Login</a></li>
+          <li><a href="#beta">Request Beta Access</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Salesbot, Inc.</span>
+    </div>
+  </div>
+</footer>
+
+</main>
+
+<script>
+  // Stagger animations when step visuals enter the viewport
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in-view');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.25 });
+  document.querySelectorAll('.step-visual').forEach((el) => io.observe(el));
+
+  // Use case tabs
+  const tabs = document.querySelectorAll('#usecase-tabs .usecase-tab');
+  const panes = document.querySelectorAll('#usecase-card .usecase-pane');
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const idx = parseInt(tab.dataset.pane, 10);
+      tabs.forEach((t) => t.classList.toggle('active', t === tab));
+      panes.forEach((p, i) => p.classList.toggle('active', i === idx));
+    });
+  });
+
+  // Case study carousel
+  const track = document.getElementById('proof-track');
+  const dots = document.querySelectorAll('#proof-dots button');
+  const prev = document.getElementById('proof-prev');
+  const next = document.getElementById('proof-next');
+  if (track) {
+    const cards = track.children;
+    const goTo = (i) => {
+      i = Math.max(0, Math.min(cards.length - 1, i));
+      cards[i].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      dots.forEach((d, di) => d.classList.toggle('active', di === i));
+      prev.disabled = i === 0;
+      next.disabled = i === cards.length - 1;
+    };
+    let current = 0;
+    dots.forEach((dot, i) => dot.addEventListener('click', () => { current = i; goTo(i); }));
+    prev.addEventListener('click', () => { current = Math.max(0, current - 1); goTo(current); });
+    next.addEventListener('click', () => { current = Math.min(cards.length - 1, current + 1); goTo(current); });
+    // Update dots when user scrolls/snaps manually
+    track.addEventListener('scroll', () => {
+      const i = Math.round(track.scrollLeft / track.clientWidth);
+      if (i !== current) { current = i; dots.forEach((d, di) => d.classList.toggle('active', di === i)); prev.disabled = i === 0; next.disabled = i === cards.length - 1; }
+    });
+    prev.disabled = true;
+  }
+</script>
+
+</body>
+</html>
